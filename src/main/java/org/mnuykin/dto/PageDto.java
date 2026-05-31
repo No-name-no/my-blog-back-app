@@ -2,7 +2,7 @@ package org.mnuykin.dto;
 
 import java.util.List;
 
-public record PostsDto(
+public record PageDto(
         List<PostDto> posts,
         Boolean hasPrev,
         Boolean hasNext,

@@ -16,5 +16,6 @@ create table if not exists comment(
 );
 
 -- Индексы
-create index if not exists idx_post_search on post (title, tags)
-create index if not exists idx_comment_postId on comment (postId)
+create index if not exists idx_post_title on post (title);
+create index if not exists idx_post_tags on post GIN (tags);
+create index if not exists idx_comment_postId on comment (postId);

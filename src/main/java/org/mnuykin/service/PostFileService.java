@@ -1,6 +1,9 @@
 package org.mnuykin.service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
 public interface PostFileService {
-    //TODO: Обновление картинки поста
-    //TODO: Получение картинки поста
+    void upload(Long postId, MultipartFile file);
+    Resource download(Long postId);
 }

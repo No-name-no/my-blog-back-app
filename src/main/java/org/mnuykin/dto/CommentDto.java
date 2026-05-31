@@ -1,6 +1,6 @@
 package org.mnuykin.dto;
 
-public record CommnetDto(
+public record CommentDto(
         Integer id,
         String text,
         Integer postId) {

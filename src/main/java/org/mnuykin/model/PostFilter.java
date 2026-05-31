@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Comment {
-    private Long id;
-    private String text;
-    private Long postId;
+public class PostFilter {
+    private String searchFilter;
+    private Set<String> tags;
 }

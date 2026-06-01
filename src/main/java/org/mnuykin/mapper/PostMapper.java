@@ -4,8 +4,10 @@ import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.mnuykin.dto.PageDto;
-import org.mnuykin.dto.PostDto;
+import org.mnuykin.dto.rq.PostCreateRqDto;
+import org.mnuykin.dto.rq.PostUpdateRqDto;
+import org.mnuykin.dto.rs.PageDto;
+import org.mnuykin.dto.rs.PostDto;
 import org.mnuykin.model.Page;
 import org.mnuykin.model.Post;
 import org.mnuykin.model.PostFilter;
@@ -15,8 +17,16 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "likesCount", constant="0")
+    @Mapping(target = "commentCount", constant="0")
+    Post toModel (PostCreateRqDto postCreateRqDto);
+
+    @Mapping(target = "likesCount", ignore = true)
+    @Mapping(target = "commentCount", ignore = true)
+    Post toModel (PostUpdateRqDto postUpdateRqDto);
+
     PostDto toDto (Post post);
-    Post toModel (PostDto postsDto);
 
     @Mapping(target = "text", source = "text", qualifiedByName = "customTextMapping")
     PostDto toDtoForList (Post post);
@@ -25,9 +35,9 @@ public interface PostMapper {
     List<PostDto> toDtoList (List<Post> postList);
 
     @Mapping(target = "posts", source = "content")
-    @Mapping(target = "lastPage", expression = "java(page.getCountPosts().longValue()/page.getPageSize())")
-    @Mapping(target = "hasPrev", expression = "java(page.getPageNumber() > 1)")
-    @Mapping(target = "hasNext", expression = "java(page.getCountPosts()/page.getPageSize() > page.getPageNumber())")
+    @Mapping(target = "lastPage", ignore = true) //expression = "java(page.getCountPosts().longValue()/page.getPageSize())")
+    @Mapping(target = "hasPrev", ignore = true) //expression = "java(page.getPageNumber() > 1)")
+    @Mapping(target = "hasNext", ignore = true) //expression = "java(page.getCountPosts()/page.getPageSize() > page.getPageNumber())")
     PageDto toDto (Page page);
 
     @Named("toDtoForList")
@@ -50,7 +60,7 @@ public interface PostMapper {
         for (String temp: search.trim().split("\\s+")){
             temp = temp.trim();
             if(temp.startsWith("#")){
-                tags.add(temp);
+                tags.add(temp.substring(1));
             } else if (!temp.isBlank()){
                 if (searchFilter.isEmpty()) {
                     searchFilter.append(temp);

@@ -36,7 +36,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
 
     @Override
     public Optional<Comment> get(Long postId, Long commentId) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "Select id, text, postId From comment where postId = ? and commentId = ?",
                         commentRowMapper,
@@ -48,7 +48,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
 
     @Override
     public Optional<Comment> save(Comment comment) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "Insert into comment (postId, text) values (?, ?) returning id, postId, text",
                         commentRowMapper,
@@ -60,7 +60,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
 
     @Override
     public Optional<Comment> update(Comment comment) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "Update comment set text = ? where id = ? and postId = ? returning id, postId, text",
                         commentRowMapper,

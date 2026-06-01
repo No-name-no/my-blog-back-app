@@ -1,8 +1,13 @@
 package org.mnuykin.controller;
 
-import org.mnuykin.dto.CommentDto;
-import org.mnuykin.dto.PageDto;
-import org.mnuykin.dto.PostDto;
+import jakarta.validation.Valid;
+import org.mnuykin.dto.rq.CommentCreateRqDto;
+import org.mnuykin.dto.rq.CommentUpdateRqDto;
+import org.mnuykin.dto.rq.PostCreateRqDto;
+import org.mnuykin.dto.rq.PostUpdateRqDto;
+import org.mnuykin.dto.rs.CommentDto;
+import org.mnuykin.dto.rs.PageDto;
+import org.mnuykin.dto.rs.PostDto;
 import org.mnuykin.mapper.CommentMapper;
 import org.mnuykin.mapper.PostMapper;
 import org.mnuykin.model.Comment;
@@ -20,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/posts")
+@RequestMapping("/api/posts")
 public class PostController {
     final private CommentService commentService;
     final private PostService postService;
@@ -53,12 +58,12 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDto> create(@RequestBody PostDto postDto){
+    public ResponseEntity<PostDto> create(@Valid @RequestBody PostCreateRqDto postDto){
         return ResponseEntity.ok(postMapper.toDto(postService.savePost(postMapper.toModel(postDto))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDto> update(@PathVariable("id") Long id, @RequestBody PostDto postDto){
+    public ResponseEntity<PostDto> update(@PathVariable("id") Long id, @Valid @RequestBody PostUpdateRqDto postDto){
         return ResponseEntity.ok(postMapper.toDto(postService.updatePost(id, postMapper.toModel(postDto))));
     }
 
@@ -81,7 +86,7 @@ public class PostController {
     @PostMapping("/{postId}/comments")
     public ResponseEntity<CommentDto> createComment(
             @PathVariable Long postId,
-            @RequestBody CommentDto comment) {
+            @Valid @RequestBody CommentCreateRqDto comment) {
 
         Comment createdComment = commentMapper.toModel(comment);
         createdComment.setPostId(postId);
@@ -93,7 +98,7 @@ public class PostController {
     public ResponseEntity<CommentDto> updateComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestBody CommentDto comment) {
+            @Valid @RequestBody CommentUpdateRqDto comment) {
 
         Comment updateComment = commentMapper.toModel(comment);
         return ResponseEntity.ok(commentMapper.toDto(commentService.updeteComment(commentId, postId, updateComment)));

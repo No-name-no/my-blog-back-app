@@ -1,7 +1,7 @@
-package org.mnuykin.dto;
+package org.mnuykin.dto.rs;
 
 public record CommentDto(
-        Integer id,
+        Long id,
         String text,
         Integer postId) {
 }

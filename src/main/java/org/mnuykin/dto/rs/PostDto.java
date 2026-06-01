@@ -1,9 +1,9 @@
-package org.mnuykin.dto;
+package org.mnuykin.dto.rs;
 
 import java.util.List;
 
 public record PostDto(
-        Integer id,
+        Long id,
         String title,
         String text,
         List<String>tags,

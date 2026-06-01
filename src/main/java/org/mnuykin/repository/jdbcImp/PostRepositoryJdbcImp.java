@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.support.SqlArrayValue;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -27,7 +28,7 @@ public class PostRepositoryJdbcImp implements PostRepository {
             rs.getString("text"),
             Arrays.asList((String[]) rs.getArray("tags").getArray()),
             rs.getInt("likesCount"),
-            rs.getInt("commentCount")
+            rs.getInt("commentsCount")
     );
     private final RowMapper<Page> pageRowMapper = (rs, rowNum) -> {
         ArrayList<Post> posts = new ArrayList<>();
@@ -38,7 +39,7 @@ public class PostRepositoryJdbcImp implements PostRepository {
 
             posts.add(postRowMapper.mapRow(rs, rowNum));
         }
-        return new Page(posts, null, null, countPosts);
+        return new Page(posts, countPosts, null, null);
     };
 
     @Override
@@ -46,31 +47,36 @@ public class PostRepositoryJdbcImp implements PostRepository {
         //MapSqlParameterSource params = new MapSqlParameterSource();
 
         String sql ="""
-                        Select id, title, text, tags, likesCount, commentCount, COUNT(p.id) OVER() AS countPosts
+                        Select id, title, text, tags, likesCount, commentsCount, COUNT(post.id) OVER() AS countPosts
                         From post
                         Where title like ?
-                            and tags @> ARRAY[?]::text[]"
+                            and tags @> ?
+                                LIMIT ? OFFSET ?
                         """;
 
         Page page = jdbcTemplate.queryForObject(
                 sql,
                 pageRowMapper,
-                filter.getSearchFilter(),
-                filter.getTags().toArray()
+                "%" + filter.getSearchFilter() + "%",
+                new SqlArrayValue("varchar", filter.getTags().toArray()),
+                pageSize,
+                pageNumber
         );
 
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
+        if(page != null){
+            page.setPageNumber(pageNumber);
+            page.setPageSize(pageSize);
+        }
 
-        return Optional.of(page);
+        return Optional.ofNullable(page);
     }
 
     @Override
     public Optional<Post> get(Long id) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         """
-                        Select id, title, text, tags, likesCount, commentCount
+                        Select id, title, text, tags, likesCount, commentsCount
                         From post
                         Where id = ?
                         """,
@@ -82,17 +88,17 @@ public class PostRepositoryJdbcImp implements PostRepository {
 
     @Override
     public Optional<Post> save(Post post) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         """
-                        Insert into post (title, text, tags, likesCount, commentCount)
+                        Insert into post (title, text, tags, likesCount, commentsCount)
                             values (?, ?, ?, ?, ?)
-                        Returning id, title, text, tags, likesCount, commentCount
+                        Returning id, title, text, tags, likesCount, commentsCount
                         """,
                         postRowMapper,
                         post.getTitle(),
                         post.getText(),
-                        post.getTags(),
+                        new SqlArrayValue("varchar", post.getTags().toArray()),
                         0L,
                         0L
                 )
@@ -101,17 +107,17 @@ public class PostRepositoryJdbcImp implements PostRepository {
 
     @Override
     public Optional<Post> update(Post post) {
-        return Optional.of(
+        return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         """
                         Update post set title = ?, text = ?, tags = ?
                         Where id = ?
-                        Returning id, title, text, tags, likesCount, commentCount
+                        Returning id, title, text, tags, likesCount, commentsCount
                         """,
                         postRowMapper,
                         post.getTitle(),
                         post.getText(),
-                        post.getTags(),
+                        new SqlArrayValue("varchar", post.getTags().toArray()),
                         post.getId()
                 )
         );

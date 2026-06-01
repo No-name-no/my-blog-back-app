@@ -1,4 +1,4 @@
-package org.mnuykin.dto;
+package org.mnuykin.dto.rs;
 
 import java.util.List;
 

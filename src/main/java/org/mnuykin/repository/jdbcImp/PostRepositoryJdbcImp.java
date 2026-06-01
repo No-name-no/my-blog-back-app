@@ -32,13 +32,8 @@ public class PostRepositoryJdbcImp implements PostRepository {
     );
     private final RowMapper<Page> pageRowMapper = (rs, rowNum) -> {
         ArrayList<Post> posts = new ArrayList<>();
-        Integer countPosts = null;
-        while (rs.next()){
-            if (countPosts == null)
-                countPosts = rs.getInt("countPosts");
-
-            posts.add(postRowMapper.mapRow(rs, rowNum));
-        }
+        Integer countPosts = rs.getInt("countPosts");
+        posts.add(postRowMapper.mapRow(rs, rowNum));
         return new Page(posts, countPosts, null, null);
     };
 

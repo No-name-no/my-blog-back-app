@@ -16,7 +16,7 @@ import java.nio.file.Path;
 public class PostFileServiceImp implements PostFileService {
     @Value("${post.image.dir:src/main/resources/images/}")
     private String imagePath;
-    @Value("${post.image.pattern:postId_%d.jpg")
+    @Value("${post.image.pattern:postId_%d.jpg}")
     private String imageNamePattern;
 
     @PostConstruct

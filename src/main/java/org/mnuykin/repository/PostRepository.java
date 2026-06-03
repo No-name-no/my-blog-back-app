@@ -13,4 +13,6 @@ public interface PostRepository {
     Optional<Post> update(Post post);
     Integer delete(Long id);
     Integer addLike(Long id);
+    Integer addComment(Long id);
+    Integer deleteComment(Long id);
 }

@@ -6,8 +6,8 @@ import org.mnuykin.model.PostFilter;
 import org.mnuykin.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.support.SqlArrayValue;
 import org.springframework.stereotype.Repository;
 
@@ -30,38 +30,42 @@ public class PostRepositoryJdbcImp implements PostRepository {
             rs.getInt("likesCount"),
             rs.getInt("commentsCount")
     );
-    private final RowMapper<Page> pageRowMapper = (rs, rowNum) -> {
-        ArrayList<Post> posts = new ArrayList<>();
-        Integer countPosts = rs.getInt("countPosts");
-        posts.add(postRowMapper.mapRow(rs, rowNum));
-        return new Page(posts, countPosts, null, null);
+
+    private ResultSetExtractor<Page> pageResultSetExtractor (final Integer pageNumber, final Integer pageSize) {
+        return (rs) -> {
+            ArrayList<Post> posts = new ArrayList<>();
+            int countPosts = 0;
+
+            if (rs.next()) {
+                countPosts = rs.getInt("countPosts");
+                do {
+                    posts.add(postRowMapper.mapRow(rs, rs.getRow()));
+                } while (rs.next());
+            }
+
+            return new Page(posts, countPosts, pageNumber, pageSize);
+        };
     };
 
     @Override
     public Optional<Page> findPage(PostFilter filter, Integer pageNumber, Integer pageSize) {
-        //MapSqlParameterSource params = new MapSqlParameterSource();
-
         String sql ="""
                         Select id, title, text, tags, likesCount, commentsCount, COUNT(post.id) OVER() AS countPosts
                         From post
                         Where title like ?
                             and tags @> ?
-                                LIMIT ? OFFSET ?
-                        """;
+                        ORDER BY id DESC
+                        LIMIT ? OFFSET ?
+                   """;
 
-        Page page = jdbcTemplate.queryForObject(
+        Page page = jdbcTemplate.query(
                 sql,
-                pageRowMapper,
+                pageResultSetExtractor(pageNumber, pageSize),
                 "%" + filter.getSearchFilter() + "%",
                 new SqlArrayValue("varchar", filter.getTags().toArray()),
                 pageSize,
                 pageNumber
         );
-
-        if(page != null){
-            page.setPageNumber(pageNumber);
-            page.setPageSize(pageSize);
-        }
 
         return Optional.ofNullable(page);
     }
@@ -132,10 +136,36 @@ public class PostRepositoryJdbcImp implements PostRepository {
                     """
                     Update post set likesCount = likesCount + 1
                     Where id = ?
-                    Returning id
+                    Returning likesCount
                     """,
                     Integer.class,
                     id
             );
+    }
+
+    @Override
+    public Integer addComment(Long id) {
+        return jdbcTemplate.queryForObject(
+                """
+                Update post set commentsCount = commentsCount + 1
+                Where id = ?
+                Returning commentsCount
+                """,
+                Integer.class,
+                id
+        );
+    }
+
+    @Override
+    public Integer deleteComment(Long id) {
+        return jdbcTemplate.queryForObject(
+                """
+                Update post set commentsCount = commentsCount - 1
+                Where id = ?
+                Returning commentsCount
+                """,
+                Integer.class,
+                id
+        );
     }
 }

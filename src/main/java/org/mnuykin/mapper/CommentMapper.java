@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mnuykin.dto.rq.CommentCreateRqDto;
 import org.mnuykin.dto.rq.CommentUpdateRqDto;
-import org.mnuykin.dto.rs.CommentDto;
+import org.mnuykin.dto.rs.CommentRsDto;
 import org.mnuykin.model.Comment;
 
 import java.util.List;
@@ -15,6 +15,6 @@ public interface CommentMapper {
     Comment toModel (CommentCreateRqDto commentDto);
     Comment toModel (CommentUpdateRqDto commentDto);
 
-    CommentDto toDto (Comment comment);
-    List<CommentDto> toDtoList (List<Comment> commnetList);
+    CommentRsDto toDto (Comment comment);
+    List<CommentRsDto> toDtoList (List<Comment> commnetList);
 }

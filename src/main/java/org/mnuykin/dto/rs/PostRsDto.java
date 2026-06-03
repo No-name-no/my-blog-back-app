@@ -2,7 +2,7 @@ package org.mnuykin.dto.rs;
 
 import java.util.List;
 
-public record PostDto(
+public record PostRsDto(
         Long id,
         String title,
         String text,

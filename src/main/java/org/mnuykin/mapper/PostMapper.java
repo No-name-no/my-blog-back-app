@@ -6,8 +6,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mnuykin.dto.rq.PostCreateRqDto;
 import org.mnuykin.dto.rq.PostUpdateRqDto;
-import org.mnuykin.dto.rs.PageDto;
-import org.mnuykin.dto.rs.PostDto;
+import org.mnuykin.dto.rs.PageRsDto;
+import org.mnuykin.dto.rs.PostRsDto;
 import org.mnuykin.model.Page;
 import org.mnuykin.model.Post;
 import org.mnuykin.model.PostFilter;
@@ -26,22 +26,22 @@ public interface PostMapper {
     @Mapping(target = "commentCount", ignore = true)
     Post toModel (PostUpdateRqDto postUpdateRqDto);
 
-    PostDto toDto (Post post);
+    PostRsDto toDto (Post post);
 
     @Mapping(target = "text", source = "text", qualifiedByName = "customTextMapping")
-    PostDto toDtoForList (Post post);
+    PostRsDto toDtoForList (Post post);
 
     @IterableMapping(qualifiedByName = "toDtoForList")
-    List<PostDto> toDtoList (List<Post> postList);
+    List<PostRsDto> toDtoList (List<Post> postList);
 
     @Mapping(target = "posts", source = "content")
-    @Mapping(target = "lastPage", ignore = true) //expression = "java(page.getCountPosts().longValue()/page.getPageSize())")
-    @Mapping(target = "hasPrev", ignore = true) //expression = "java(page.getPageNumber() > 1)")
-    @Mapping(target = "hasNext", ignore = true) //expression = "java(page.getCountPosts()/page.getPageSize() > page.getPageNumber())")
-    PageDto toDto (Page page);
+    @Mapping(target = "lastPage", expression = "java(getLastPage(page.getCountPosts(), page.getPageSize()))")
+    @Mapping(target = "hasPrev", expression = "java(page.getPageNumber() > 1)")
+    @Mapping(target = "hasNext", expression = "java(getLastPage(page.getCountPosts(), page.getPageSize()) > page.getPageNumber())")
+    PageRsDto toDto (Page page);
 
     @Named("toDtoForList")
-    default PostDto toDtoWithMapping(Post post) {
+    default PostRsDto toDtoWithMapping(Post post) {
         return toDtoForList(post);
     }
 
@@ -51,12 +51,20 @@ public interface PostMapper {
         return text != null && text.length() > textMaxSize ? text.substring(textMaxSize) : text;
     }
 
-    default PostFilter toPostFilter(String search){
-        if (search == null || search.isEmpty())
-            return new PostFilter();
+    default Integer getLastPage(Integer countPosts, Integer pageSize){
+        if(countPosts == null || pageSize == null || pageSize == 0)
+            return 0;
 
+        return (countPosts + pageSize - 1)/pageSize;
+    }
+
+    default PostFilter toPostFilter(String search){
         StringBuilder searchFilter = new StringBuilder();
         HashSet<String> tags = new HashSet<>();
+
+        if (search == null || search.isEmpty())
+            return new PostFilter("", tags);
+
         for (String temp: search.trim().split("\\s+")){
             temp = temp.trim();
             if(temp.startsWith("#")){

@@ -2,9 +2,9 @@ package org.mnuykin.dto.rs;
 
 import java.util.List;
 
-public record PageDto(
-        List<PostDto> posts,
+public record PageRsDto(
+        List<PostRsDto> posts,
         Boolean hasPrev,
         Boolean hasNext,
-        Long lastPage) {
+        Integer lastPage) {
 }

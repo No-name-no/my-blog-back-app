@@ -12,18 +12,18 @@ import java.util.Optional;
 
 @Repository
 public class CommentRepositoryJdbcImp implements CommentRepository {
-    private final RowMapper<Comment> commentRowMapper = (rs, rowNum) -> new Comment(
-            rs.getLong("id"),
-            rs.getString("text"),
-            rs.getLong("postId")
-    );
-
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public CommentRepositoryJdbcImp(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
+    private final RowMapper<Comment> commentRowMapper = (rs, rowNum) -> new Comment(
+            rs.getLong("id"),
+            rs.getString("text"),
+            rs.getLong("postId")
+    );
 
     @Override
     public List<Comment> findAll(Long postId) {
@@ -35,10 +35,10 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
     }
 
     @Override
-    public Optional<Comment> get(Long postId, Long commentId) {
+    public Optional<Comment> get (Long postId, Long commentId) {
         return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
-                        "Select id, text, postId From comment where postId = ? and commentId = ?",
+                        "Select id, text, postId From comment where postId = ? and id = ?",
                         commentRowMapper,
                         postId,
                         commentId
@@ -47,7 +47,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
     }
 
     @Override
-    public Optional<Comment> save(Comment comment) {
+    public Optional<Comment> save (Comment comment) {
         return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "Insert into comment (postId, text) values (?, ?) returning id, postId, text",
@@ -59,7 +59,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
     }
 
     @Override
-    public Optional<Comment> update(Comment comment) {
+    public Optional<Comment> update (Comment comment) {
         return Optional.ofNullable(
                 jdbcTemplate.queryForObject(
                         "Update comment set text = ? where id = ? and postId = ? returning id, postId, text",
@@ -72,7 +72,7 @@ public class CommentRepositoryJdbcImp implements CommentRepository {
     }
 
     @Override
-    public Integer delete(Long postId, Long commentId) {
+    public Integer delete (Long postId, Long commentId) {
         return jdbcTemplate.update(
                 "Delete From comment where id = ? and postId = ?",
                 postId,

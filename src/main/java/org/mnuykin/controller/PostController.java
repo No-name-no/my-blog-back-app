@@ -1,13 +1,14 @@
 package org.mnuykin.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.mnuykin.dto.rq.CommentCreateRqDto;
 import org.mnuykin.dto.rq.CommentUpdateRqDto;
 import org.mnuykin.dto.rq.PostCreateRqDto;
 import org.mnuykin.dto.rq.PostUpdateRqDto;
-import org.mnuykin.dto.rs.CommentDto;
-import org.mnuykin.dto.rs.PageDto;
-import org.mnuykin.dto.rs.PostDto;
+import org.mnuykin.dto.rs.CommentRsDto;
+import org.mnuykin.dto.rs.PageRsDto;
+import org.mnuykin.dto.rs.PostRsDto;
 import org.mnuykin.mapper.CommentMapper;
 import org.mnuykin.mapper.PostMapper;
 import org.mnuykin.model.Comment;
@@ -44,7 +45,7 @@ public class PostController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PageDto> posts(
+    public ResponseEntity<PageRsDto> posts(
             @RequestParam("search") String search,
             @RequestParam("pageNumber") Integer pageNumber,
             @RequestParam("pageSize") Integer pageSize){
@@ -52,40 +53,47 @@ public class PostController {
         return ResponseEntity.ok(postMapper.toDto(page));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDto> post(@PathVariable("id") Long id){
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostRsDto> post(@PathVariable("postId") Long id){
         return ResponseEntity.ok(postMapper.toDto(postService.getPost(id)));
     }
 
     @PostMapping
-    public ResponseEntity<PostDto> create(@Valid @RequestBody PostCreateRqDto postDto){
+    public ResponseEntity<PostRsDto> create(@Valid @RequestBody PostCreateRqDto postDto){
         return ResponseEntity.ok(postMapper.toDto(postService.savePost(postMapper.toModel(postDto))));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PostDto> update(@PathVariable("id") Long id, @Valid @RequestBody PostUpdateRqDto postDto){
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostRsDto> update(@PathVariable("postId") Long id,
+                                            @Valid @RequestBody PostUpdateRqDto postDto){
         return ResponseEntity.ok(postMapper.toDto(postService.updatePost(id, postMapper.toModel(postDto))));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id){
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> delete(@PathVariable("postId") Long id){
         postService.deletePost(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/likes")
-    public ResponseEntity<Integer> create(@PathVariable("id") Long id){
+    @PutMapping("/{postId}/likes")
+    public ResponseEntity<Integer> create(@PathVariable("postId") Long id){
         return ResponseEntity.ok(postService.addLike(id));
     }
 
     @GetMapping("/{postId}/comments")
-    public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long postId) {
+    public ResponseEntity<List<CommentRsDto>> getComments(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(commentMapper.toDtoList(commentService.findComments(postId)));
     }
 
+    @GetMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<CommentRsDto> getComment(@PathVariable("postId") Long postId,
+                                                   @PathVariable("commentId") Long commentId) {
+        return ResponseEntity.ok(commentMapper.toDto(commentService.getComment(postId, commentId)));
+    }
+
     @PostMapping("/{postId}/comments")
-    public ResponseEntity<CommentDto> createComment(
-            @PathVariable Long postId,
+    public ResponseEntity<CommentRsDto> createComment(
+            @PathVariable("postId") Long postId,
             @Valid @RequestBody CommentCreateRqDto comment) {
 
         Comment createdComment = commentMapper.toModel(comment);
@@ -95,9 +103,9 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/comments/{commentId}")
-    public ResponseEntity<CommentDto> updateComment(
-            @PathVariable Long postId,
-            @PathVariable Long commentId,
+    public ResponseEntity<CommentRsDto> updateComment(
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId,
             @Valid @RequestBody CommentUpdateRqDto comment) {
 
         Comment updateComment = commentMapper.toModel(comment);
@@ -108,19 +116,18 @@ public class PostController {
     public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId,
                                               @PathVariable("postId") Long postId) {
         commentService.deleteComment(postId, commentId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{postId}/image")
-    public ResponseEntity<Void> addPostImage(@PathVariable Long postId,
-                                             @RequestParam("file") MultipartFile file) {
+    @PutMapping(value = "/{postId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> addPostImage(@PathVariable("postId") Long postId,
+                                             @NotNull @RequestParam("image") MultipartFile file) {
         postFileService.upload(postId, file);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{postId}/image")
-    public ResponseEntity<Resource> getPostImage(@PathVariable Long postId) {
+    public ResponseEntity<Resource> getPostImage(@PathVariable("postId") Long postId) {
         return ResponseEntity.ok(postFileService.download(postId));
     }
-
 }

@@ -8,5 +8,5 @@ public record CommentUpdateRqDto(
         @NotNull
         String text,
         @NotNull
-        Integer postId) {
+        Long postId) {
 }

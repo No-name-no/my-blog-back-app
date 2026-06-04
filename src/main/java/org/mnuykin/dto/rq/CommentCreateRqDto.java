@@ -6,5 +6,5 @@ public record CommentCreateRqDto (
         @NotNull
         String text,
         @NotNull
-        Integer postId) {
+        Long postId) {
 }

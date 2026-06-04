@@ -128,6 +128,6 @@ public class PostController {
 
     @GetMapping("/{postId}/image")
     public ResponseEntity<Resource> getPostImage(@PathVariable("postId") Long postId) {
-        return ResponseEntity.ok(postFileService.download(postId));
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(postFileService.download(postId));
     }
 }

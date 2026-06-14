@@ -1,15 +1,17 @@
 package org.mnuykin.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.json.JsonMapper;
 
 @Testcontainers
 public abstract class TestPgContainers {
-    protected final ObjectMapper objectMapper = new ObjectMapper();
+    protected final JsonMapper objectMapper = new JsonMapper();
 
     @Container
     @SuppressWarnings("resource")

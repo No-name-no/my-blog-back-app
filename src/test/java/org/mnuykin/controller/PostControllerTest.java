@@ -2,24 +2,19 @@ package org.mnuykin.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mnuykin.configuration.DataSourceConfiguration;
-import org.mnuykin.configuration.WebConfiguration;
 import org.mnuykin.dto.rq.CommentCreateRqDto;
 import org.mnuykin.dto.rq.CommentUpdateRqDto;
 import org.mnuykin.dto.rq.PostCreateRqDto;
 import org.mnuykin.dto.rq.PostUpdateRqDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.InputStream;
 import java.util.List;
@@ -34,23 +29,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringJUnitConfig(classes = {
-        DataSourceConfiguration.class,
-        WebConfiguration.class,
-})
-@WebAppConfiguration
-@TestPropertySource(locations = "classpath:application-test.properties")
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
 public class PostControllerTest extends TestPgContainers {
     @Autowired
-    private WebApplicationContext wac;
-    @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
         jdbcTemplate.execute("TRUNCATE TABLE post CASCADE");
         jdbcTemplate.execute("""
                     INSERT INTO post (id, title, text, tags, likesCount, commentsCount) VALUES

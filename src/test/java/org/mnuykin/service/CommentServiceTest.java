@@ -2,16 +2,13 @@ package org.mnuykin.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mnuykin.configuration.UnitServiceTestConfig;
 import org.mnuykin.model.Comment;
 import org.mnuykin.repository.CommentRepository;
 import org.mnuykin.repository.PostRepository;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,16 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UnitServiceTestConfig.class)
-@ActiveProfiles("unit-test")
+@SpringBootTest
 public class CommentServiceTest {
     private final Long postId = 1L;
     private final Long commentId = 1L;
 
-    @Autowired
+    @MockitoBean
     private CommentRepository commentRepository;
-    @Autowired
+    @MockitoBean
     private PostRepository postRepository;
     @Autowired
     private CommentService commentService;

@@ -2,17 +2,14 @@ package org.mnuykin.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mnuykin.configuration.UnitServiceTestConfig;
 import org.mnuykin.model.Page;
 import org.mnuykin.model.Post;
 import org.mnuykin.model.PostFilter;
 import org.mnuykin.repository.PostRepository;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,11 +18,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UnitServiceTestConfig.class)
-@ActiveProfiles("unit-test")
+@SpringBootTest
 public class PostServiceTest {
-    @Autowired
+    @MockitoBean
     private PostRepository postRepository;
     @Autowired
     private PostService postService;
